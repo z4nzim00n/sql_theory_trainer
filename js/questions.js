@@ -1,0 +1,510 @@
+window.SQL_THEORY = (() => {
+    const datasets = {
+        studentHobbyRu: [
+            {
+                name: 'Student',
+                columns: ['id', 'name'],
+                rows: [
+                    [1, 'Иван'],
+                    [2, 'Анна'],
+                    [3, 'Ирина'],
+                ],
+            },
+            {
+                name: 'Hobby',
+                columns: ['id', 'student_id', 'hobby'],
+                rows: [
+                    [10, 1, 'Хоккей'],
+                    [20, 1, 'Музыка'],
+                    [30, 3, 'Чтение'],
+                    [40, 4, 'Плавание'],
+                ],
+            },
+        ],
+        studentHobbyEn: [
+            {
+                name: 'Student',
+                columns: ['id', 'name'],
+                rows: [
+                    [1, 'Ivan'],
+                    [2, 'Anna'],
+                    [3, 'Irina'],
+                ],
+            },
+            {
+                name: 'Hobby',
+                columns: ['id', 'student_id', 'hobby'],
+                rows: [
+                    [10, 1, 'Hockey'],
+                    [20, 1, 'Music'],
+                    [30, 3, 'Reading'],
+                    [40, 4, 'Swimming'],
+                ],
+            },
+        ],
+        employee: [
+            {
+                name: 'Employee',
+                columns: ['id', 'employee', 'transaction'],
+                rows: [
+                    [1, 'Иван', 100],
+                    [2, 'Анна', 200],
+                    [3, 'Ирина', 50],
+                    [4, 'Иван', 330],
+                    [5, 'Анна', 45],
+                ],
+            },
+        ],
+        studentReg: [
+            {
+                name: 'Student',
+                columns: ['id', 'name', 'reg_num'],
+                rows: [
+                    [1, 'Ivan', 123],
+                    [2, 'Anna', null],
+                    [3, 'Irina', 456],
+                ],
+            },
+        ],
+        hobbySimple: [
+            {
+                name: 'Hobby',
+                columns: ['id', 'student', 'hobby'],
+                rows: [
+                    [1, 'Иван', 'Хоккей'],
+                    [2, 'Анна', 'Блог'],
+                    [3, 'Ирина', 'Чтение'],
+                    [4, 'Иван', 'Футбол'],
+                    [5, 'Анна', 'Спорт'],
+                ],
+            },
+        ],
+    };
+
+    const questions = [
+        {
+            id: 1,
+            kind: 'practice',
+            tag: 'Практика 12',
+            topic: 'CROSS JOIN',
+            prompt: 'Сколько строк и столбцов вернёт запрос?',
+            dataset: 'studentHobbyRu',
+            sql: 'SELECT * FROM Student AS s CROSS JOIN Hobby AS h;',
+            options: ['R = 4, C = 5', 'R = 4, C = 4', 'R = 12, C = 4', 'R = 12, C = 5'],
+            correct: [3],
+            explanation:
+                'CROSS JOIN — декартово произведение: 3 студента × 4 хобби = 12 строк. В результат попадают все столбцы обеих таблиц: id и name из Student, id, student_id и hobby из Hobby — итого 5 столбцов.',
+        },
+        {
+            id: 2,
+            kind: 'theory',
+            tag: 'Теория',
+            topic: 'DDL · ограничения',
+            prompt: 'Какая команда используется для создания CHECK CONSTRAINT?',
+            options: ['ALTER TABLE', 'CREATE TABLE', 'INSERT INTO', 'UPDATE TABLE'],
+            correct: [0, 1],
+            explanation:
+                'CHECK можно добавить к существующей таблице через ALTER TABLE ... ADD CONSTRAINT, а можно объявить сразу при создании таблицы в CREATE TABLE. Поэтому засчитываются оба варианта. INSERT и UPDATE TABLE ограничения не создают.',
+        },
+        {
+            id: 3,
+            kind: 'theory',
+            tag: 'Теория',
+            topic: 'DDL · ограничения',
+            prompt: 'Какая команда используется для создания FOREIGN KEY?',
+            options: ['CREATE INDEX', 'ADD CONSTRAINT', 'ALTER VIEW', 'INSERT INTO'],
+            correct: [1],
+            explanation:
+                'Внешний ключ добавляют через ALTER TABLE ... ADD CONSTRAINT ... FOREIGN KEY (или объявляют при CREATE TABLE). В предложенных вариантах подходит ADD CONSTRAINT; остальные команды ограничения не создают.',
+        },
+        {
+            id: 4,
+            kind: 'theory',
+            tag: 'Теория',
+            topic: 'Моделирование данных',
+            prompt: 'Какое из следующих понятий описывает связь между двумя сущностями в логической модели данных?',
+            options: ['Хеш-код', 'Внешний ключ', 'Индекс', 'Триггер'],
+            correct: [1],
+            explanation:
+                'Внешний ключ (FOREIGN KEY) связывает строки дочерней таблицы со строками родительской, то есть задаёт связь между сущностями. Индекс ускоряет поиск, триггер выполняет код по событию, а хеш-код — это просто значение.',
+        },
+        {
+            id: 5,
+            kind: 'practice',
+            tag: 'Практика 11',
+            topic: 'INNER JOIN',
+            prompt: 'Что вернёт запрос?',
+            dataset: 'studentHobbyRu',
+            sql: "SELECT s.name, h.hobby FROM Student AS s INNER JOIN Hobby AS h ON s.id = h.student_id WHERE h.hobby = 'Хоккей' AND h.hobby = 'Чтение';",
+            options: [
+                "('Ирина', 'Чтение')",
+                'не вернёт ни одной строки',
+                "('Иван', 'Хоккей')",
+                '(NULL, NULL)',
+            ],
+            correct: [1],
+            explanation:
+                "В одном условии hobby не может быть одновременно и 'Хоккей', и 'Чтение', поэтому WHERE не пропустит ни одной строки. INNER JOIN вернёт пустой результат.",
+        },
+        {
+            id: 6,
+            kind: 'practice',
+            tag: 'Практика 3',
+            topic: 'SELECT · WHERE',
+            prompt: 'Что вернёт запрос?',
+            sql: 'SELECT 1 + 1 AS value WHERE 1 = 1 AND 2 = 1;',
+            options: ['не вернёт ни одной строки', '2', 'синтаксическая ошибка', 'NULL'],
+            correct: [0],
+            explanation:
+                'Условие WHERE 1 = 1 AND 2 = 1 ложно, поэтому запрос не вернёт ни одной строки. Синтаксически запрос корректен.',
+        },
+        {
+            id: 7,
+            kind: 'theory',
+            tag: 'Теория',
+            topic: 'Индексы',
+            prompt: 'Какая команда используется для создания составного индекса?',
+            options: [
+                'ADD COMPOSITE INDEX',
+                'CREATE COMPOSITE INDEX',
+                'CREATE INDEX table_name (col, index, col2)',
+                'CREATE INDEX comp_index ON table_name (col1, col2)',
+            ],
+            correct: [3],
+            explanation:
+                'Составной индекс создаётся обычным CREATE INDEX с несколькими столбцами: CREATE INDEX имя ON таблица (столбец1, столбец2). Отдельной команды CREATE COMPOSITE INDEX нет.',
+        },
+        {
+            id: 8,
+            kind: 'practice',
+            tag: 'Практика 13',
+            topic: 'RIGHT JOIN',
+            prompt: 'Что вернёт запрос?',
+            dataset: 'studentHobbyRu',
+            sql: 'SELECT s.name, h.hobby FROM Student AS s RIGHT JOIN Hobby AS h ON s.id = h.student_id ORDER BY s.name NULLS FIRST;',
+            options: [
+                'не вернёт ни одной строки',
+                "('Иван', 'Музыка')",
+                "(NULL, 'Плавание')",
+                "('Анна', NULL)",
+            ],
+            correct: [2],
+            explanation:
+                "RIGHT JOIN сохраняет все строки Hobby. Для student_id = 4 в Student нет записи, поэтому name = NULL, а hobby = 'Плавание'. NULLS FIRST ставит эту строку первой — подходит вариант (NULL, 'Плавание').",
+        },
+        {
+            id: 9,
+            kind: 'practice',
+            tag: 'Практика 10',
+            topic: 'Оконные функции',
+            prompt: 'Что вернёт запрос?',
+            dataset: 'employee',
+            sql: 'SELECT employee FROM (SELECT employee, row_number() OVER (ORDER BY transaction) AS row_num FROM Employee GROUP BY employee) AS tl WHERE tl.row_num = 2 ORDER BY 1 ASC LIMIT 1;',
+            options: ['синтаксическая ошибка', "'Ирина'", "'Иван'", "'Анна'"],
+            correct: [0],
+            explanation:
+                'Внутри подзапроса стоит GROUP BY employee, но row_number() использует transaction, который не входит в GROUP BY и не агрегируется. PostgreSQL выдаст ошибку: column "transaction" must appear in the GROUP BY clause or be used in an aggregate function. В вариантах она названа «синтаксическая ошибка».',
+        },
+        {
+            id: 10,
+            kind: 'practice',
+            tag: 'Практика 15',
+            topic: 'CTE',
+            prompt: 'Что вернёт запрос?',
+            dataset: 'studentHobbyRu',
+            sql: "WITH _a AS (SELECT s.name, h.hobby FROM Student AS s RIGHT JOIN Hobby AS h ON s.id = h.student_id ORDER BY s.name NULLS FIRST LIMIT 1), _b AS (SELECT 1/0 AS res) SELECT * FROM _a;",
+            options: [
+                "(NULL, 'Плавание')",
+                'не вернёт ни одной строки',
+                "('Иван', 'Музыка')",
+                "('Анна', NULL)",
+            ],
+            correct: [0],
+            explanation:
+                "_b не используется в основном запросе, поэтому PostgreSQL не выполняет его и деление на ноль не возникает. _a возвращает первую строку RIGHT JOIN с NULLS FIRST: (NULL, 'Плавание').",
+        },
+        {
+            id: 11,
+            kind: 'practice',
+            tag: 'Практика 1',
+            topic: 'CASE · NULL',
+            prompt: 'Что вернёт запрос?',
+            sql: "SELECT CASE WHEN NULL = 5 THEN 'A' WHEN NULL <> 5 THEN 'B' ELSE 'C' END AS result;",
+            options: ['NULL', "'B'", "'C'", "'A'"],
+            correct: [2],
+            explanation:
+                "Сравнение с NULL даёт NULL, а не TRUE или FALSE. Оба условия WHEN пропускаются, срабатывает ELSE → 'C'.",
+        },
+        {
+            id: 12,
+            kind: 'practice',
+            tag: 'Практика 6',
+            topic: 'ORDER BY · NULL',
+            prompt: 'Что вернёт запрос?',
+            dataset: 'studentReg',
+            sql: 'SELECT reg_num FROM Student ORDER BY reg_num NULLS LAST LIMIT 1;',
+            options: ['123', 'не вернёт ни одной строки', '456', 'NULL'],
+            correct: [0],
+            explanation:
+                'ORDER BY reg_num по возрастанию: 123, 456, NULL. NULLS LAST оставляет NULL в конце, а LIMIT 1 берёт первое значение — 123.',
+        },
+        {
+            id: 13,
+            kind: 'theory',
+            tag: 'Теория',
+            topic: 'Моделирование данных',
+            prompt: 'Какой из следующих языков используется для описания логической модели данных?',
+            options: ['SQL', 'UML', 'JSON', 'HTML'],
+            correct: [1],
+            explanation:
+                'UML — язык визуального моделирования: диаграммы классов, сущностей и связей. SQL — язык запросов к данным, JSON — формат обмена данными, HTML — разметка страниц.',
+        },
+        {
+            id: 14,
+            kind: 'theory',
+            tag: 'Теория',
+            topic: 'Нормальные формы',
+            prompt: 'Что представляет собой первая нормальная форма (1NF)?',
+            options: [
+                'Все значения атрибутов в таблице уникальны',
+                'Каждая ячейка в таблице содержит только одно значение',
+                'Все атрибуты зависят от первичного ключа',
+                'Каждая таблица имеет первичный ключ',
+            ],
+            correct: [1],
+            explanation:
+                '1NF требует атомарности: в каждой ячейке — одно неделимое значение, без списков и повторяющихся групп. Уникальность значений и зависимость от ключа — это другие требования.',
+        },
+        {
+            id: 15,
+            kind: 'theory',
+            tag: 'Теория',
+            topic: 'Ключи',
+            prompt: 'Что такое первичный ключ?',
+            options: [
+                'Уникальный идентификатор записей в таблице',
+                'Столбец с уникальным значением и NULL',
+                'Столбец, содержащий внешний ключ',
+                'Столбец с дублирующимися значениями',
+            ],
+            correct: [0],
+            explanation:
+                'Первичный ключ однозначно идентифицирует строку и не может содержать NULL. Дубликаты и NULL для него недопустимы.',
+        },
+        {
+            id: 16,
+            kind: 'theory',
+            tag: 'Теория',
+            topic: 'ER-модель',
+            prompt: 'Что концептуально представляет собой структура ER-модели?',
+            options: [
+                'Отношения между сущностями',
+                'Имена сущностей',
+                'Ключевые слова',
+                'Характеристики сущностей',
+            ],
+            correct: [0],
+            explanation:
+                'ER-модель описывает сущности и отношения (связи) между ними. Атрибуты — это характеристики сущностей, но структура модели в целом задаётся именно отношениями.',
+        },
+        {
+            id: 17,
+            kind: 'theory',
+            tag: 'Теория',
+            topic: 'Транзакции',
+            prompt: 'Какое действие выполняет команда COMMIT?',
+            options: [
+                'отменяет текущую транзакцию',
+                'отменяет все изменения',
+                'применяет изменения текущей транзакции только для чтения',
+                'подтверждает все изменения, сделанные в текущей транзакции',
+            ],
+            correct: [3],
+            explanation:
+                'COMMIT фиксирует транзакцию: все изменения становятся постоянными. Отмена изменений — это ROLLBACK.',
+        },
+        {
+            id: 18,
+            kind: 'theory',
+            tag: 'Теория',
+            topic: 'CAP',
+            prompt: 'Что означает CAP в CAP-теореме?',
+            options: [
+                'Connection, Authentication, Persistence',
+                'Consistency, Accuracy, Performance',
+                'Coordination, Availability, Processing',
+                'Consistency, Availability, Partition Tolerance',
+            ],
+            correct: [3],
+            explanation:
+                'CAP = Consistency (согласованность), Availability (доступность), Partition Tolerance (устойчивость к разделению). Теорема говорит, что при сетевом разделении нельзя одновременно гарантировать все три свойства.',
+        },
+        {
+            id: 19,
+            kind: 'practice',
+            tag: 'Практика 4',
+            topic: 'EXISTS',
+            prompt: 'Что вернёт запрос?',
+            dataset: 'studentHobbyEn',
+            sql: 'SELECT count(*) FROM Student AS s WHERE EXISTS (SELECT NULL FROM Hobby AS h WHERE h.student_id = s.id LIMIT 1);',
+            options: ['не вернёт ни одной строки', '3', '2', 'NULL'],
+            correct: [2],
+            explanation:
+                'EXISTS проверяет, есть ли хотя бы одно хобби у студента. Записи есть у Ивана (id 1) и Ирины (id 3), у Анны (id 2) — нет. COUNT(*) вернёт 2.',
+        },
+        {
+            id: 20,
+            kind: 'practice',
+            tag: 'Практика 8',
+            topic: 'GROUP BY',
+            prompt: 'Что вернёт запрос?',
+            dataset: 'employee',
+            sql: 'SELECT employee, sum(transaction) FROM Employee GROUP BY employee ORDER BY 2 DESC LIMIT 1;',
+            options: [
+                "('Анна', 530)",
+                'синтаксическая ошибка',
+                "('Иван', 430)",
+                "('Ирина', 50)",
+            ],
+            correct: [2],
+            explanation:
+                'Суммы: Иван 100 + 330 = 430, Анна 200 + 45 = 245, Ирина 50. ORDER BY 2 DESC сортирует по сумме, LIMIT 1 оставляет Ивана — (\'Иван\', 430).',
+        },
+        {
+            id: 21,
+            kind: 'practice',
+            tag: 'Практика 7',
+            topic: 'HAVING',
+            prompt: 'Что вернёт запрос?',
+            dataset: 'hobbySimple',
+            sql: "SELECT student FROM Hobby GROUP BY student HAVING student LIKE '%Анна%' LIMIT 1;",
+            options: ['NULL', 'синтаксическая ошибка', "'Анна'", 'не вернёт ни одной строки'],
+            correct: [2],
+            explanation:
+                "GROUP BY student собирает группы по имени, HAVING оставляет группу «Анна» (LIKE '%Анна%'), LIMIT 1 возвращает 'Анна'.",
+        },
+        {
+            id: 22,
+            kind: 'practice',
+            tag: 'Практика 14',
+            topic: 'UNION',
+            prompt: 'Что вернёт запрос?',
+            dataset: 'studentHobbyRu',
+            sql: "SELECT string_agg(tl.id::VARCHAR, ',' ORDER BY tl.id) AS result FROM (SELECT s.id FROM Student AS s UNION SELECT h.student_id FROM Hobby AS h) AS tl;",
+            options: [
+                '1, 1, 2, 3, 3, 4',
+                '1, 2, 3, 4',
+                'синтаксическая ошибка',
+                '1, 1, 1, 2, 3, 3, 4',
+            ],
+            correct: [1],
+            explanation:
+                'UNION объединяет результаты и убирает дубликаты: id студентов 1, 2, 3 и student_id из Hobby 1, 3, 4 → 1, 2, 3, 4. string_agg с ORDER BY собирает их в строку «1,2,3,4».',
+        },
+        {
+            id: 23,
+            kind: 'practice',
+            tag: 'Практика 9',
+            topic: 'DISTINCT',
+            prompt: 'Что вернёт запрос?',
+            dataset: 'employee',
+            sql: 'SELECT DISTINCT employee AS emp FROM Employee ORDER BY 1 DESC LIMIT 1;',
+            options: ['синтаксическая ошибка', "'Ирина'", "'Иван'", "'Анна'"],
+            correct: [1],
+            explanation:
+                'DISTINCT оставляет Иван, Анна, Ирина. ORDER BY 1 DESC сортирует по убыванию; последняя по алфавиту — «Ирина», она и возвращается.',
+        },
+        {
+            id: 24,
+            kind: 'practice',
+            tag: 'Практика 2',
+            topic: 'SUM · NULL',
+            prompt: 'Что вернёт запрос?',
+            sql: 'SELECT sum(tl.value) FROM (SELECT NULL::INTEGER AS value) AS tl;',
+            options: ['0', 'синтаксическая ошибка', 'NULL', '1'],
+            correct: [2],
+            explanation:
+                'В подзапросе одна строка со значением NULL. SUM игнорирует NULL, а от пустого множества значений возвращает NULL, а не 0.',
+        },
+        {
+            id: 25,
+            kind: 'theory',
+            tag: 'Теория',
+            topic: 'CHECK',
+            prompt: 'Что произойдёт, если объект с CHECK CONSTRAINT не пройдёт проверку при вставке?',
+            options: [
+                'Данные будут автоматически удалены',
+                'База данных выдаст предупреждение, но продолжит операцию',
+                'Операция вставки или обновления будет отклонена',
+                'Ограничение будет автоматически отключено',
+            ],
+            correct: [2],
+            explanation:
+                'CHECK CONSTRAINT проверяет условие при вставке и обновлении. При нарушении PostgreSQL отклоняет операцию с ошибкой, данные не записываются.',
+        },
+        {
+            id: 26,
+            kind: 'practice',
+            tag: 'Практика 5',
+            topic: 'IN · подзапрос',
+            prompt: 'Что вернёт запрос?',
+            dataset: 'studentHobbyEn',
+            sql: 'SELECT count(*) FROM Student AS s WHERE id IN (SELECT * FROM Hobby);',
+            options: ['3', '2', 'NULL', 'синтаксическая ошибка'],
+            correct: [3],
+            explanation:
+                'Подзапрос в IN должен возвращать ровно один столбец, а SELECT * FROM Hobby возвращает три (id, student_id, hobby). PostgreSQL выдаст ошибку.',
+        },
+        {
+            id: 27,
+            kind: 'theory',
+            tag: 'Теория',
+            topic: 'ACID',
+            prompt: 'Какой принцип ACID гарантирует, что если транзакция прошла успешно, изменения будут сохранены даже в случае сбоя?',
+            options: ['Надёжность', 'Атомарность', 'Согласованность', 'Изоляция'],
+            correct: [0],
+            explanation:
+                'Durability (в варианте — «Надёжность», также переводят как «долговечность») гарантирует, что зафиксированные изменения сохранятся после сбоя. Атомарность — «всё или ничего», согласованность — переход между корректными состояниями, изоляция — независимость транзакций.',
+        },
+        {
+            id: 28,
+            kind: 'theory',
+            tag: 'Теория',
+            topic: 'Типы БД',
+            prompt: 'Какая из перечисленных не относится к реляционным БД?',
+            options: ['MySQL', 'psql', 'MongoDB', 'Oracle'],
+            correct: [2],
+            explanation:
+                'MongoDB — документо-ориентированная NoSQL-база. MySQL, PostgreSQL (клиент psql) и Oracle — реляционные СУБД.',
+        },
+        {
+            id: 29,
+            kind: 'theory',
+            tag: 'Теория',
+            topic: 'Реляционная модель',
+            prompt: 'Что подходит под термин «реляционная БД»?',
+            options: [
+                'Хранилище JSON-файлов',
+                'База на графах',
+                'Большие файлы',
+                'Структура данных, основанная на связях между таблицами',
+            ],
+            correct: [3],
+            explanation:
+                'Реляционная модель — это набор таблиц (отношений), связанных ключами. JSON-хранилища, графовые и файловые базы — другие модели данных.',
+        },
+        {
+            id: 30,
+            kind: 'theory',
+            tag: 'Теория',
+            topic: 'СУБД',
+            prompt: 'Какая из перечисленных служб управляет доступом к данным?',
+            options: ['SQL Server', 'DBMS', 'Query Optimizer', 'Transaction Manager'],
+            correct: [1],
+            explanation:
+                'DBMS (СУБД) управляет хранением, изменением и доступом к данным. SQL Server — конкретная СУБД, Query Optimizer строит план запроса, Transaction Manager отвечает за транзакции.',
+        },
+    ];
+
+    return { datasets, questions };
+})();

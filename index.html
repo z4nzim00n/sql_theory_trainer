@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ru" data-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Тренажёр по теории SQL: 30 вопросов с разбором, прогрессом и режимами «теория / практика».">
+    <meta name="theme-color" content="#080c18">
+    <title>SQL Theory — тренажёр теории</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop stop-color='%237c9cff'/%3E%3Cstop offset='1' stop-color='%234ee0c1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='%23080c18'/%3E%3Ctext x='32' y='43' font-family='Arial,sans-serif' font-size='28' font-weight='800' text-anchor='middle' fill='url(%23g)'%3ES%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="#" id="homeLink" aria-label="На главную">
+            <span class="brand-mark">SQL</span>
+            <span class="brand-text">SQL <em>Theory</em></span>
+        </a>
+        <div class="topbar-right">
+            <div id="scorePill" class="score-pill" hidden></div>
+            <button id="resetBtn" class="icon-btn" type="button" title="Сбросить прогресс" aria-label="Сбросить прогресс" hidden>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v5h5"/></svg>
+            </button>
+            <button id="themeBtn" class="icon-btn" type="button" title="Сменить тему" aria-label="Сменить тему">
+                <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+                <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="wrap">
+        <section id="startScreen" class="screen">
+            <div class="card hero">
+                <div class="hero-glow" aria-hidden="true"></div>
+                <span class="eyebrow">SQL · подготовка к экзамену</span>
+                <h1>30 вопросов.<br><span class="grad">Один спокойный заход.</span></h1>
+                <p class="lead">Теория и практика в одном тренажёре: выбираешь ответ, сразу видишь разбор и возвращаешься к сложным местам.</p>
+
+                <div class="hero-stats" aria-label="Состав теста">
+                    <div><strong>30</strong><span>вопросов</span></div>
+                    <div><strong>15</strong><span>теории</span></div>
+                    <div><strong>15</strong><span>практики</span></div>
+                </div>
+
+                <div class="mode-picker" role="group" aria-label="Режим теста">
+                    <button class="mode-btn" type="button" data-mode="all">Все <span>30</span></button>
+                    <button class="mode-btn" type="button" data-mode="theory">Теория <span>15</span></button>
+                    <button class="mode-btn" type="button" data-mode="practice">Практика <span>15</span></button>
+                </div>
+
+                <label class="switch">
+                    <input type="checkbox" id="shuffleToggle">
+                    <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+                    <span>Перемешать вопросы</span>
+                </label>
+
+                <div class="hero-actions">
+                    <button id="startBtn" class="btn primary big" type="button">Начать тест</button>
+                    <button id="clearBtn" class="btn ghost" type="button" hidden>Сбросить прогресс</button>
+                </div>
+                <p id="startHint" class="hint">Ответ проверяется сразу, с разбором.</p>
+            </div>
+
+            <div class="features">
+                <div class="feature">
+                    <span>01</span>
+                    <h3>Разбор сразу</h3>
+                    <p>После ответа — объяснение, почему вариант верный, а не просто галочка.</p>
+                </div>
+                <div class="feature">
+                    <span>02</span>
+                    <h3>Прогресс в браузере</h3>
+                    <p>Можно закрыть вкладку и продолжить с того же места. Никаких аккаунтов.</p>
+                </div>
+                <div class="feature">
+                    <span>03</span>
+                    <h3>Только нужное</h3>
+                    <p>Режимы «вся теория» и «только практика»: 15 вопросов в каждом.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="quizScreen" class="screen" hidden>
+            <div class="quiz-grid">
+                <div class="quiz-main">
+                    <div class="quiz-top">
+                        <div class="quiz-meta">
+                            <span id="qTag" class="chip accent"></span>
+                            <span id="qTopic" class="chip"></span>
+                            <span id="qCounter" class="counter"></span>
+                        </div>
+                        <div class="progress-track" role="progressbar" aria-label="Прогресс" aria-valuemin="0" aria-valuemax="100" id="progressTrack">
+                            <div id="progressBar" class="progress-bar"></div>
+                        </div>
+                    </div>
+
+                    <article class="card question-card">
+                        <h2 id="qPrompt" class="question-title"></h2>
+                        <div id="qDataset" class="dataset"></div>
+                        <div id="qSql" class="sql-wrap"></div>
+                        <div id="qOptions" class="options" role="group" aria-label="Варианты ответа"></div>
+                        <div id="qFeedback" class="feedback" aria-live="polite" hidden></div>
+                        <div class="question-actions">
+                            <button id="checkBtn" class="btn primary" type="button" disabled>Ответить</button>
+                            <span class="kbd-hint"><kbd>1</kbd>–<kbd>4</kbd> выбрать · <kbd>Enter</kbd> ответить</span>
+                        </div>
+                    </article>
+                </div>
+
+                <aside class="quiz-side">
+                    <div class="card side-card">
+                        <div class="side-head">
+                            <span>Все вопросы</span>
+                            <span id="sideProgress" class="muted"></span>
+                        </div>
+                        <div id="qMap" class="qmap"></div>
+                        <div class="legend">
+                            <span><i class="dot ok"></i>верно</span>
+                            <span><i class="dot bad"></i>ошибка</span>
+                            <span><i class="dot current"></i>сейчас</span>
+                        </div>
+                    </div>
+                    <div class="card side-tip">
+                        <strong>Как это работает</strong>
+                        <p>Выбери ответ и нажми «Ответить». Разбор появится сразу, а прогресс сохранится в браузере.</p>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+        <section id="resultScreen" class="screen" hidden>
+            <div class="card result-card">
+                <div class="result-head">
+                    <div id="ring" class="ring" style="--p: 0">
+                        <div class="ring-inner">
+                            <strong id="resultPercent">0%</strong>
+                            <span id="resultScore">0 из 30</span>
+                        </div>
+                    </div>
+                    <div class="result-copy">
+                        <span class="eyebrow">Результат</span>
+                        <h2 id="resultTitle"></h2>
+                        <p id="resultText"></p>
+                        <div id="breakdown" class="breakdown"></div>
+                    </div>
+                </div>
+                <div class="result-actions">
+                    <button id="retryWrongBtn" class="btn primary" type="button">Разобрать ошибки</button>
+                    <button id="restartBtn" class="btn" type="button">Пройти заново</button>
+                    <button id="toStartBtn" class="btn ghost" type="button">К началу</button>
+                </div>
+            </div>
+            <div id="review" class="review"></div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <span>SQL Theory · тренажёр к экзамену</span>
+        <span>Прогресс хранится только в этом браузере</span>
+    </footer>
+
+    <script src="js/questions.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
