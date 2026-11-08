@@ -45,6 +45,28 @@
     --shadow: 0 20px 50px rgba(31, 45, 80, 0.12);
 }
 
+[data-theme="nightfox"] {
+    color-scheme: dark;
+    --bg: #192330;
+    --topbar: rgba(25, 35, 48, 0.78);
+    --surface: rgba(19, 26, 36, 0.7);
+    --surface-solid: #131a24;
+    --surface-2: #212e3f;
+    --border: rgba(113, 156, 214, 0.18);
+    --border-strong: rgba(113, 156, 214, 0.34);
+    --text: #d6d6d7;
+    --muted: #aeafb0;
+    --faint: #71839b;
+    --accent: #719cd6;
+    --accent-2: #63cdcf;
+    --good: #81b29a;
+    --good-soft: rgba(129, 178, 154, 0.12);
+    --bad: #c94f6d;
+    --bad-soft: rgba(201, 79, 109, 0.12);
+    --warn: #dbc074;
+    --shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
 * {
     box-sizing: border-box;
 }
@@ -84,8 +106,19 @@ body::before {
         radial-gradient(720px 620px at 50% 112%, rgba(79, 110, 247, 0.07), transparent 60%);
 }
 
+[data-theme="nightfox"] body::before {
+    background:
+        radial-gradient(900px 620px at 10% -12%, rgba(113, 156, 214, 0.2), transparent 62%),
+        radial-gradient(820px 520px at 94% -4%, rgba(99, 205, 207, 0.12), transparent 60%),
+        radial-gradient(720px 620px at 50% 112%, rgba(157, 121, 214, 0.1), transparent 60%);
+}
+
 ::selection {
     background: rgba(124, 156, 255, 0.35);
+}
+
+[data-theme="nightfox"] ::selection {
+    background: rgba(113, 156, 214, 0.35);
 }
 
 [hidden] {
@@ -207,6 +240,7 @@ body::before {
 }
 
 [data-theme="dark"] .icon-sun,
+[data-theme="nightfox"] .icon-sun,
 [data-theme="light"] .icon-moon {
     display: none;
 }
@@ -659,6 +693,11 @@ body::before {
 [data-theme="light"] .sql-block {
     border-color: #223055;
     background: #10182c;
+}
+
+[data-theme="nightfox"] .sql-block {
+    border-color: rgba(113, 156, 214, 0.22);
+    background: #101828;
 }
 
 .sql-head {

@@ -642,6 +642,11 @@
         renderStart();
     }
 
+    const THEMES = ['dark', 'nightfox', 'light'];
+    const THEME_META = { dark: '#080c18', nightfox: '#192330', light: '#f4f6fc' };
+    const THEME_LABEL = { dark: 'тёмная', nightfox: 'NightFox', light: 'светлая' };
+    const THEME_NEXT = { dark: 'тёмную', nightfox: 'NightFox', light: 'светлую' };
+
     function applyTheme(theme, persist = true) {
         document.documentElement.dataset.theme = theme;
         if (persist) {
@@ -651,15 +656,17 @@
                 /* ignore */
             }
         }
-        const dark = theme === 'dark';
-        els.themeBtn.title = dark ? 'Светлая тема' : 'Тёмная тема';
-        els.themeBtn.setAttribute('aria-label', dark ? 'Включить светлую тему' : 'Включить тёмную тему');
+        const next = THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length];
+        els.themeBtn.title = `Тема: ${THEME_LABEL[theme]} — переключить на ${THEME_NEXT[next]}`;
+        els.themeBtn.setAttribute('aria-label', `Тема: ${THEME_LABEL[theme]}. Переключить на ${THEME_NEXT[next]}`);
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', THEME_META[theme]);
     }
 
     function initialTheme() {
         try {
             const saved = localStorage.getItem(THEME_KEY);
-            if (saved === 'light' || saved === 'dark') return saved;
+            if (THEMES.includes(saved)) return saved;
         } catch (_) {
             /* ignore */
         }
@@ -726,7 +733,8 @@
     });
 
     els.themeBtn.addEventListener('click', () => {
-        applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+        const current = document.documentElement.dataset.theme;
+        applyTheme(THEMES[(THEMES.indexOf(current) + 1) % THEMES.length]);
     });
 
     document.addEventListener('keydown', (event) => {
